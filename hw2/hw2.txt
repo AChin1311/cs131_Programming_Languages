@@ -1,0 +1,55 @@
+1. Convert Grammar
+
+To convert the grammar from hw1-style to hw2-style, a helper function that 
+lists out all the grammar rules that have the input term as the left-hand-side 
+is created. The start symbol in hw1-style grammar along with a function that 
+takes the helper function as input is returned in hw2-style.
+
+2. Grammar Matcher
+
+My solution is composed of three functions, parse_prefix, matcher, and 
+matcherer. All the argument needed for the matching process is passed to the 
+first function. The matcher function does the high-level match for each 
+possible rule. The matcherer function is the helper function of the matcher 
+function that does the exact matching part of a rule and the fragment.
+
+The parse_prefix function takes gram, accept, and frag as input. The start 
+symbol is firstly unfolded into an alternative list and pass into the matcher 
+function, where each right-hand-side rule in the alternative list is matched with the fragment.
+
+If a right-hand-side rule matches with the fragment, then return whatever the 
+acceptor returns. Otherwise, continue matching the next right-hand-side rule, 
+until no more rule is left, then returns the special value, None. Note that 
+the exact matching process is done in the matcherer function.
+
+In the matcherer function, terms in the right-hand-side rules are matched with 
+elements in the whole/partial fragment one by one. First, iterate over terms 
+in the right-hand-side. For each term, match it with the current element in 
+the fragment. If the term is a terminal, then simply match the terminal value 
+with the fragment element. If equal, continue to call matcherer to match the 
+rest of terms and elements. Otherwise, return None, indicating this right-hand-
+side rule cannot match the fragment.
+
+If the term is a non-terminal, unfold the term into a new alternative list and 
+pass it into the match function, where again the fragment is matched with the 
+new alternative list. Note here, in order to make the process recursive, a 
+currying function is made of the matcherer function as the new acceptor. 
+Therefore, when the current term is matched, the program continues to match 
+the rest of the terms with rest of the elements in the fragment. Eventually, 
+this algorithm will either find a derivation to the fragment or return the 
+special value None.
+
+There are some cases that will make my program loop forever. If the left-hand-
+side nonterminal appears on the right-hand-side, then it is possible that the 
+program will keep unfolding the grammar without matching them, which is known 
+as left-recursion. For example, a rule (SVP -> N SVP + T "adv";) will make the 
+unfolding process go on forever until reaching the limited depth of recursion. 
+Interestingly, if we switch the order of terms in the rule, (SNP -> T "adj" + 
+N SNP;), then the unfolding process will generate a sequence of "adj". But 
+because the given fragment is of limited length, in this case, the unfolding 
+process will end when it reaches the length of the given fragment.
+
+The problem can be solved by removing all the left recursions. The left 
+recusion can be found by establishing a topological ordering on nonterminals. 
+However, this algorithm is not included in this assignment and all the left 
+recursions are removed manually.
